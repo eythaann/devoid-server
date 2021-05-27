@@ -1,7 +1,11 @@
-runtime: nodejs14
+runtime: nodejs
+env: flex
 
 env_variables:
-  CLOUD_SQL_USERNAME: root
-  CLOUD_SQL_PASSWORD: yB5dsbAmy2hAArEq
-  CLOUD_SQL_DATABASE_NAME: devoid
-  CLOUD_SQL_CONNECTION_NAME: devoid-store:us-east1:devoid-database
+  SQL_USERNAME: root
+  SQL_PASSWORD: yB5dsbAmy2hAArEq
+  SQL_DATABASE_NAME: devoid
+  SQL_CONNECTION_NAME: devoid-api:us-east1:devoid-database
+
+beta_settings:
+  cloud_sql_instances: devoid-api:us-east1:devoid-database
