@@ -13,7 +13,7 @@ const { database } = require('./keys');
     // If connecting via unix domain socket, specify the path
     socketPath: `${dbSocketPath}/${process.env.CLOUD_SQL_CONNECTION_NAME}`,
     // Specify additional properties here.
-    ...config,
+    
   });
 
 
