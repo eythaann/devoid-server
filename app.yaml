@@ -1,1 +1,7 @@
 runtime: nodejs14
+
+env_variables:
+  CLOUD_SQL_USERNAME: root
+  CLOUD_SQL_PASSWORD: yB5dsbAmy2hAArEq
+  CLOUD_SQL_DATABASE_NAME: devoid
+  CLOUD_SQL_CONNECTION_NAME: devoid-store:us-east1:devoid-database
