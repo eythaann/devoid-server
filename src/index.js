@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const path = require('path');
 const passport = require('passport');
 const customMdw = require('./middleware/custom');
 
@@ -32,6 +33,7 @@ app.use((req, res, next) => {
 // Routes
 
 app.use('/api/v1', require('./routes/api.js'), require('./routes/api-pay.js'));
+
 
 
 app.use(customMdw.errorHandler);
