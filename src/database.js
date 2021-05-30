@@ -1,15 +1,29 @@
 const mysql = require('mysql');
 const { promisify } = require('util');
 const { database } = require('./keys');
-const dbSocketPath = process.env.DB_SOCKET_PATH || '/cloudsql';
-const pool =  mysql.createPool({
-    user: process.env.DB_USER, // e.g. 'my-db-user'
-    password: process.env.DB_PASS, // e.g. 'my-db-password'
-    database: process.env.DB_NAME, // e.g. 'my-database'
-    // If connecting via unix domain socket, specify the path
-    socketPath: `${dbSocketPath}/${process.env.CLOUD_SQL_CONNECTION_NAME}`
-    // Specify additional properties here.  
-  });
+
+const pool =  mysql.createPool(database);
+
+pool.getConnection((err, connection) => {
+  if (err) {
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      console.error('Database connection was closed.');
+    }
+    if (err.code === 'ER_CON_COUNT_ERROR') {
+      console.error('Database has to many connections');
+    }
+    if (err.code === 'ECONNREFUSED') {
+      console.error('Database connection was refused');
+    }
+  }
+
+  if (connection){ 
+  connection.release(); 
+  console.log('Database is Connected');
+  }
+  return;
+
+});
 
 pool.query = promisify(pool.query);
 module.exports = pool;

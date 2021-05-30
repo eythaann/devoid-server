@@ -1,11 +1,14 @@
 module.exports = {
+
   database: {
-    socketPatch: '/cloudsql/devoid-api:us-east1:devoid-database',
-    host: '35.231.49.251',
+    host: '34.73.6.170',
     port: '3306',
     user: 'root',
     password: 'yB5dsbAmy2hAArEq',
     database: 'devoid',
   },
+
   jwtSecret: 'soy un secreto'
+
+
 };

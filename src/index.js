@@ -29,6 +29,9 @@ app.use(passport.initialize());
 
 app.use('/api/v1', require('./routes/api.js'), require('./routes/api-pay.js'));
 
+app.get('*',(req,res)=>{
+  res.status(404).send('default backend - 404')
+})
 
 app.use(customMdw.errorHandler);
 
