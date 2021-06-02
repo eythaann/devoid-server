@@ -45,18 +45,30 @@ router.get('/store', (req, res) => {
   let category = req.query.category;
   let collection = req.query.collection;
 
-  if(category>0)
+  if(category)
   {
-    pool.query(`SELECT product_name,product_price,product_route FROM product WHERE product_state = 1 && category_id=${category}`)
-    .then(store=>{
-    res.json(store);
+    pool.query(`Select id FROM category WHERE category_name =?`,category)
+    .then(id=>{
+    pool.query(`SELECT product_name,product_price,product_route FROM product WHERE product_state = 1 && category_id=${id[0].id}`)
+      .then(store=>{
+      res.json(store);
+      }).catch(err=>{res.json(err)})
+    })
+    .catch(err=>{
+      res.send(err)
     })
   }
-  else if(collection>0)
+  else if(collection)
   {
-    pool.query(`SELECT product_name,product_price,product_route FROM product WHERE product_state = 1 && category_id=${collection}`)
-    .then(store=>{
-      res.json(store);
+    pool.query(`Select id FROM collection WHERE collection_name=?`, collection)
+    .then(id=>{
+      pool.query(`SELECT product_name,product_price,product_route FROM product WHERE product_state = 1 && collection_id=${id[0].id}`)
+      .then(store=>{
+        res.json(store);
+      }).catch(err=>{res.json(err)})
+    })
+    .catch(err=>{
+      res.send(err)
     })
   }else{
     pool.query  ('SELECT product_name,product_price,product_route FROM product WHERE product_state = 1')
@@ -143,6 +155,7 @@ router.get('/car', (req, res)=>{
       if(cart.length > 0){
         res.json(cart)
       }else res.json({'cart': 'no items'})
+      
     })
     }
   }
