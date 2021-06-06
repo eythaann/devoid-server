@@ -174,4 +174,41 @@ router.delete('/car',(req,res)=>{
   }
 })
 
+router.get('/adress',(req, res)=>{
+  pool.query(`SELECT * FROM adress WHERE user_id = 87`).then(data =>{
+    if(data.length === 0){
+      res.json({'adress':false})
+    }else{ 
+      res.json({'adress':true})
+    }
+  })
+})
+
+router.post('/adress',(req, res)=>{
+  const token = req.body.token
+  const decoded = jwt.verify(token, 'secret')
+  if(decoded){
+    pool.query(`SELECT * FROM adress WHERE user_id = 87`).then(data=>{
+      if(data.length === 0){
+        const adress = {
+          user_id : decoded.id,
+          adress : req.body.adress,
+          adress2 : req.body.adress2,
+          country : req.body.country,
+          state : req.body.state,
+          city : req.body.city,
+          postal_code : req.body.postal,
+          phone : req.body.phone
+        }
+        pool.query(`INSERT INTO adress ?`, adress).then(data=>{ res.json({'adress':true})})
+      }else{
+        res.json({'error':'ya registrado'})
+      }
+    })
+    
+  }
+  
+})
+
+
 module.exports = router;
