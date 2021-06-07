@@ -51,7 +51,8 @@ let controller = {
                 const payload = {
                     id: user.user_id,
                     exp: Date.now(),
-                    username: user.email
+                    username: user.email,
+                    name: user.username
                 };
 
                 const token = jwt.sign(JSON.stringify(payload), 'secret');

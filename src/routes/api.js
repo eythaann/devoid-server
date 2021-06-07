@@ -150,7 +150,8 @@ router.get('/car', (req, res)=>{
     pool.query(
       `SELECT * FROM user_car 
       INNER JOIN product 
-      ON user_car.user_id=${decoded.id} && user_car.product_id=product.product_id`)
+      ON user_car.user_id=${decoded.id} && user_car.product_id=product.product_id
+      ORDER BY car_id DESC`)
     .then(cart=>{
       if(cart.length > 0){
         res.json(cart)
@@ -174,21 +175,25 @@ router.delete('/car',(req,res)=>{
   }
 })
 
-router.get('/adress',(req, res)=>{
-  pool.query(`SELECT * FROM adress WHERE user_id = 87`).then(data =>{
+router.get('/check-adress',(req, res)=>{
+  const token = req.headers['x-access'];
+  const decoded = jwt.verify(token, 'secret')
+  if(decoded){
+  pool.query(`SELECT * FROM adress WHERE user_id = ${decoded.id}`).then(data =>{
     if(data.length === 0){
       res.json({'adress':false})
     }else{ 
       res.json({'adress':true})
     }
   })
+  }
 })
 
 router.post('/adress',(req, res)=>{
   const token = req.body.token
   const decoded = jwt.verify(token, 'secret')
   if(decoded){
-    pool.query(`SELECT * FROM adress WHERE user_id = 87`).then(data=>{
+    pool.query(`SELECT * FROM adress WHERE user_id = ${decoded.id}`).then(data=>{
       if(data.length === 0){
         const adress = {
           user_id : decoded.id,
@@ -200,7 +205,7 @@ router.post('/adress',(req, res)=>{
           postal_code : req.body.postal,
           phone : req.body.phone
         }
-        pool.query(`INSERT INTO adress ?`, adress).then(data=>{ res.json({'adress':true})})
+        pool.query(`INSERT INTO adress SET ?`,[adress]).then(data=>{ res.json({'adress':true})})
       }else{
         res.json({'error':'ya registrado'})
       }
@@ -210,5 +215,28 @@ router.post('/adress',(req, res)=>{
   
 })
 
+
+router.get('/order', (req, res) => {
+  const token = req.headers['x-access'];
+  if (!token) {
+    res.json({ 'error': 'no token' })
+  } else {
+    const decoded = jwt.verify(token, 'secret');
+    if (decoded) {
+      pool.query(`
+  SELECT order_date, orders.order_id , order_state, product_amount, product_color, product_size, product_name, product_route, total from orders
+  JOIN order_items
+  ON user_id = ${decoded.id} && orders.order_id = order_items.order_id
+  JOIN product
+  ON product.product_id = order_items.product_id
+  ORDER BY order_id DESC`).then(orders => {
+        if (orders.length > 0) {
+          res.json(orders)
+        } else res.json({ 'orders': 'no items' })
+      })
+    }
+  }
+
+})
 
 module.exports = router;
