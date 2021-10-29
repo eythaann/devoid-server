@@ -1,24 +1,22 @@
-const express = require('express');
-//const morgan = require('morgan'); // desactivar en prod
-const cors = require('cors');
-const path = require('path');
-const passport = require('passport');
-const customMdw = require('./middleware/custom');
-
+import express, { urlencoded, json } from 'express';
+import morgan from 'morgan'; // desactivar en prod
+import cors from 'cors';
+import path from 'path';
+import { errorHandler } from './middleware/custom.js';
+import api from './routes/api.js';
+import apipay from './routes/api-pay.js'
 
 //inicialization
 const app = express();
-
-require('./lib/passport');
-
+import passport from './lib/passport.js';
 
 // Settings
 app.set('port', process.env.PORT || 3000);
 
 // MiddLewares
-//*app.use(morgan('common'));    // desactivar en prod
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(morgan('common'));    // desactivar en prod
+app.use(urlencoded({ extended: true }));
+app.use(json());
 app.use(cors());
 app.use(passport.initialize());
 
@@ -27,13 +25,13 @@ app.use(passport.initialize());
 
 // Routes
 
-app.use('/api/v1', require('./routes/api.js'), require('./routes/api-pay.js'));
+app.use('/api/v1', api, apipay);
 
 app.get('*',(req,res)=>{
   res.status(404).send('default backend - 404')
 })
 
-app.use(customMdw.errorHandler);
+app.use(errorHandler);
 
 
 // Listen Server

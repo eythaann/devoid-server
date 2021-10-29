@@ -1,10 +1,10 @@
-const express = require('express');
-const { check, validationResult } = require('express-validator');
-const router = express.Router();
-const UserController = require('../lib/user');
-const jwt = require('jsonwebtoken');
-const pool = require('../database');
-const { jwtSecret }= require('../keys');
+import { Router } from 'express';
+import { check, validationResult } from 'express-validator';
+const router = Router();
+import { login, register } from '../lib/user.js';
+import jwt from 'jsonwebtoken';
+import pool from '../database.js';
+import { jwtSecret } from '../keys.js';
 
 /* Login and Register*/
 router.post(
@@ -18,7 +18,7 @@ router.post(
     if (!errors.isEmpty()) {
       res.send(errors);
     } else {
-      UserController.login(req, res, next);
+      login(req, res, next);
     };
   }
 );
@@ -35,7 +35,7 @@ router.post(
     if (!errors.isEmpty()) {
       res.send(errors);
     } else {
-      UserController.register(req, res, next);
+      register(req, res, next);
     };
   }
 );
@@ -74,7 +74,7 @@ router.get('/store', (req, res) => {
     pool.query  ('SELECT product_name,product_price,product_route FROM product WHERE product_state = 1')
     .then(store=>{
       res.json(store);
-    })
+    }).catch(err=>res.send(err))
   }
 });
 
@@ -87,20 +87,21 @@ router.get('/filters', (req,res)=>{
       filters.push(category)
       res.json(filters)
     })
-  })
+  }).catch(err=>res.send(err))
 })
 
 
 /* Product */
 router.get('/store/:nompro', (req, res, next) => {
   const { nompro } = req.params;
-  const product = pool.query(`
+  pool.query(`
   SELECT * FROM product 
   INNER JOIN product_variant 
   ON product.product_route='${nompro}' && product.product_id = product_variant.product_id`)
   .then(product=>{
     if(Object.entries(product).length === 1){
       res.json(product);
+      
     }else{
       res.json([{error:'no-exist'}])
     }
@@ -115,10 +116,12 @@ router.get('/store/:nompro', (req, res, next) => {
 /* Add, Get, Delete and Uptade Cart */
 router.post('/car',(req,res)=>{
   const token = req.headers['x-access'];
+  //console.log(token)
   if(!token){
     res.json({'error':'notoken'})
   }else{
     const decoded = jwt.verify(token, 'secret')
+    //console.log(decoded)
     const car = {
       user_id: decoded.id,
       product_id: req.body.id,
@@ -126,14 +129,16 @@ router.post('/car',(req,res)=>{
       product_size: req.body.size,
       product_amount: req.body.amount,
   }
-    pool.query(`SELECT car_id FROM user_car WHERE (user_id = ${car.user_id}) && (product_id=${car.product_id}) && (product_color='${car.product_color}') && (product_size='${car.product_size}')`)
+  //console.log(car)
+    pool.query(`SELECT car_id FROM user_car WHERE (user_id = ${decoded.id}) && (product_id=${car.product_id}) && (product_color='${car.product_color}') && (product_size='${car.product_size}')`)
     .then(rows=>{
-    if(Object.entries(rows).length === 1){/*item car exist, just add amount*/
-      pool.query(`UPDATE user_car SET product_amount= product_amount+${car.product_amount} WHERE car_id=${rows[0].car_id}`)
-      res.json({"res":"sumando al carrito"})
-      }else{
+    if(rows.length === 0){/*item car exist, just add amount*/
         pool.query('INSERT INTO user_car set ?', [car]);
-        res.json({"res":"agregado correctamente"})
+        res.json({"res":true})
+      }else{
+        pool.query(`UPDATE user_car SET product_amount= product_amount+${car.product_amount} WHERE car_id=${rows[0].car_id}`).then(data=>{
+          res.json({"res":true})
+        })
       }
     })  
   }
@@ -239,4 +244,4 @@ router.get('/order', (req, res) => {
 
 })
 
-module.exports = router;
+export default router;

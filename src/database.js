@@ -1,8 +1,8 @@
-const mysql = require('mysql');
-const { promisify } = require('util');
-const { database } = require('./keys');
+import { createPool } from 'mysql';
+import { promisify } from 'util';
+import { database } from './keys.js';
 
-const pool =  mysql.createPool(database);
+const pool = createPool(database);
 
 pool.getConnection((err, connection) => {
   if (err) {
@@ -15,6 +15,9 @@ pool.getConnection((err, connection) => {
     if (err.code === 'ECONNREFUSED') {
       console.error('Database connection was refused');
     }
+    if (err.code === 'ETIMEDOUT'){
+      console.error('Database is lost');
+    }
   }
 
   if (connection){ 
@@ -23,7 +26,7 @@ pool.getConnection((err, connection) => {
   }
   return;
 
-});
-
+})
 pool.query = promisify(pool.query);
-module.exports = pool;
+export default pool;
+

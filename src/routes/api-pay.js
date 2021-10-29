@@ -1,12 +1,12 @@
-const express = require('express');
-const router = express.Router();
-const request = require('request');
-const pool = require('../database');
-const jwt = require('jsonwebtoken');
+import { Router } from 'express';
+const router = Router();
+import request from 'request';
+import pool from '../database.js';
+import jwt from 'jsonwebtoken';
 
-const CLIENT = 'AYI62dbOwWmX08xifVsXwBgpxlF1IfwgGjmc9otgZlnBQPor-Xm5hy_71pOdvNDFSWxInN4HJ0_MMUoY';
-const SECRET = 'EJPWLBB8y2uuHudFq9BaYXihk71V9NEwkQJx0Jr39TK8m856_1f8P1StbubrroUHYt8zGWyIyYpLvZIi';
-const PAYPAL_API = 'https://api-m.paypal.com' //'https://api-m.sandbox.paypal.com'; //LIVE  https://api-m.paypal.com
+const CLIENT = 'AQaZIbQGYL2zOIt4bE6WiSH20PLRULriWn1RIpIq5Gl1C3rU-Z6ZN17A-NS10JYNNdzYJzWvdMjcEMlH';
+const SECRET = 'EFPvPMPaEwOJto37prdQb3GvILb1K6hrZc0xBLKwHqkBCi9j_rHh9fNzUdjmfIHdVQtHEJ2YpjuyZV29';
+const PAYPAL_API = 'https://api-m.sandbox.paypal.com' //'https://api-m.sandbox.paypal.com'; //LIVE  https://api-m.paypal.com
 const auth = { user: CLIENT, pass: SECRET };
 
 /* 
@@ -81,8 +81,8 @@ const createPayment = (req, res, decoded, order_id, total) => {
       brand_name: 'Devoid',
       landing_page: 'NO_PREFERENCE',
       user_action: 'PAY_NOW',
-      return_url: 'https://api-devoid.ue.r.appspot.com/api/v1/neworder',
-      cancel_url: 'https://devoid.shop/car',
+      return_url: 'http://localhost:3000/api/v1/neworder',
+      cancel_url: 'http://localhost:4200/cart',
     },
   };
 
@@ -94,14 +94,15 @@ const createPayment = (req, res, decoded, order_id, total) => {
       json: true,
     },
     (err, response) => {
+      //console.log(response)
       res.json(response.body.links[1].href);
-      console.log(response.body.links[1].href);
+      //console.log(response.body.links[1].href);
     }
   );
 };
 
 const createwasslink = (req, res, decoded, order_id, total) => {
-  const wass = `https://wa.me/593987595894?text=Hola!, mi nombre es ${decoded.name} y estoy
+  const wass = `https://wa.me/593939649993?text=Hola!, mi nombre es ${decoded.name} y estoy
   interesado en pagar/comprar un producto en efectivo/deposito. id de compra:${order_id}, valor total $${total}`
   res.json(wass)
 }
@@ -128,14 +129,14 @@ const executePayment = (req, res) => {
           pool.query(
             `UPDATE orders SET order_state=1 WHERE orders.order_id=${order_id}`
           );
-          res.redirect('https://devoid.shop/user/orders');
+          res.redirect('http://localhost:4200/user/orders');
         } else {
-          res.redirect('https://devoid.shop/user/orders?err');
+          res.redirect('http://localhost:4200/user/orders?err');
         }
       }
     );
   } else {
-    res.redirect('https://devoid.shop/user/orders?err');
+    res.redirect('http://localhost:4200/user/orders?err');
   }
 };
 
@@ -149,4 +150,4 @@ router.get('/neworder', executePayment);
 
 
 
-module.exports = router;
+export default router;

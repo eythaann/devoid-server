@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "devoid",
   "version": "0.0.1",
   "description": "Pagina ecommers devoid",
@@ -27,6 +28,6 @@
     "request": "^2.88.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.13"
   }
 }

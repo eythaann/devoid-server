@@ -1,11 +1,8 @@
 'use strict'
-const error_types       = require('../lib/error_types');
-let middlewares = {
-    /*
-    Este middleware va al final de todos los middleware y rutas.
-    middleware de manejo de errores.
-    */
-    errorHandler: (error, req, res, next) => {
+import error_types from '../lib/error_types.js';
+    /* Este middleware va al final de todos los middleware y rutas.
+    middleware de manejo de errores. */
+   export const errorHandler = (error, req, res, next) => {
         //console.log("ejecutando middleware de control de errores");
         if(error instanceof error_types.InfoError)
             res.json({error: error.message}).status(200);
@@ -19,8 +16,4 @@ let middlewares = {
             res.json({error: error.message}).status(500);
         else
             next();
-    },
-}
-    
-
-module.exports = middlewares;
+    }

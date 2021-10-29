@@ -34,4 +34,4 @@ const error_types = {
     } 
 };
 
-module.exports = error_types;
+export default error_types;

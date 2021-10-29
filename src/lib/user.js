@@ -1,16 +1,18 @@
 'use strict'
-const passport  = require('passport');
-const jwt       = require('jsonwebtoken');
-const pool = require('../database');
-const helper = require('./helper');
-const error_types = require('./error_types');
+import passport from 'passport';
+import jwt from 'jsonwebtoken';
 
-let controller = {
+import pool from '../database.js';
+
+import {encryptPasswords} from './helper.js';
+import error_types from './error_types.js';
+
+
 
     /*Podríamos haber realizado el registro pasando por el middleware de passport, pero en este caso 
     se realiza contra una base de datos asi que es muy sencillo hacerlo nosotros.*/
 
-    register: (req, res, next) => {
+    export let register = (req, res, next) => {
         //console.log("caso register");
         pool.query('SELECT * FROM users WHERE email= ?', [req.body.email])
         .then(rows => { //si la consulta se ejecuta
@@ -19,7 +21,7 @@ let controller = {
                 }
                 else { //si no existe el usuario se crea/registra
                     console.log("\x1b[32m%s\x1b[0m" ,"Creando Nuevo Usuario");
-                    helper.encryptPasswords(req.body.password)
+                    encryptPasswords(req.body.password)
                     .then(hash=>{
                         const document = {
                             username: req.body.username,
@@ -28,7 +30,7 @@ let controller = {
                         };
                     pool.query('INSERT INTO users set ?', [document])
                     .then(data => { //usuario registrado con exito, pasamos al siguiente manejador
-                        controller.login(req, res, next)
+                        login(req, res, next)
                     })
                     })
                 }
@@ -36,10 +38,10 @@ let controller = {
             .catch(err => { //error en registro, lo pasamos al manejador de errores
                 next(err);
             })
-    },
+    }
 
 
-    login: (req, res, next) => {
+    export let login = (req, res, next) => {
         //console.log("caso login");
         passport.authenticate("local", { session: false }, (error, user) => {
             //console.log("ejecutando *callback auth* de authenticate para estrategia local");
@@ -49,7 +51,7 @@ let controller = {
             }else {
                 //console.log("*** comienza generacion token*****");
                 const payload = {
-                    id: user.user_id,
+                    id: user.id,
                     exp: Date.now(),
                     username: user.email,
                     name: user.username
@@ -63,6 +65,5 @@ let controller = {
     }
 
 
-}
 
-module.exports = controller;
+
